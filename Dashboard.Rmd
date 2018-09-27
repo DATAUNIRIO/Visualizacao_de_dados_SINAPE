@@ -1,0 +1,199 @@
+---
+title: "Visualização de dados com R"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+    social: [ "twitter", "facebook", "menu"]
+    source_code: embed
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(knitr)
+library(DT)
+library(rpivotTable)
+library(ggplot2)
+library(plotly)
+library(dplyr)
+library(openintro)
+library(highcharter)
+library(ggvis)
+library(plotly)
+library(treemap)
+library(ggridges)
+library(corrplot)
+```
+
+
+```{r}
+data <- read.csv("Turma_estudantes.csv",sep=";",dec=",")
+rownames(data) <- data$Aluno
+```
+
+```{r}
+mycolors <- c("blue", "red", "darkgreen", "darkorange")
+```
+
+Visualização de Dados
+=====================================
+
+Row 
+---------------------------
+### Característica da turma 
+
+```{r}
+valueBox(paste("Turma Estatística"),
+         color = "green")
+```
+
+### Quantidade de estudantes
+
+```{r}
+valueBox(dim(data)[1])
+```
+
+### **Média de Idade**
+
+```{r}
+gauge(round(mean(data$Idade),
+            digits = 2),
+            min = 19,
+            max = 35)
+```
+
+### Copacabana
+
+```{r}
+valueBox(sum(data$Bairro == "Copacabana")
+         )
+```
+
+### Ipanema
+
+```{r}
+valueBox(sum(data$Bairro == "Ipanema"),
+         icon = 'fa-tag')
+```
+
+### Leblon
+
+```{r}
+valueBox(sum(data$Bairro == "Leblon"),
+         icon = 'fa-building')
+```
+
+### Lagoa
+
+```{r}
+valueBox(sum(data$Bairro == "Lagoa"),
+         icon = 'fa-building')
+```
+
+
+Row {.tabset .tabset-fade}
+-------------------------------
+  
+### Quantidade de estudantes por bairro
+  
+```{r}
+p1 <- data %>%
+  group_by(Bairro) %>%
+  summarise(count = n()) %>%
+  plot_ly(x = ~Bairro,
+          y = ~ count,
+          color = "blue",
+          type = 'bar') %>%
+  layout(xaxis = list(title = "Bairro"),
+         yaxis = list(title = 'Frequência Absoluta'))
+p1
+```
+
+### Boxplot Altura x Sexo
+
+```{r}
+p2 <- plot_ly(data, x = ~factor(Sexo), y = ~Altura) %>% 
+      add_boxplot()
+p2
+```
+
+
+### Dispersão
+
+```{r}
+p4 <- plot_ly(data, x=~Altura) %>%
+         add_markers(y = ~Peso,
+                     text = ~paste("Peso: ", Peso),
+                     showlegend = F) %>%
+         add_lines(y = ~fitted(loess(Peso ~ Altura)),
+                   color = I("#FFC125"),
+                   showlegend = T,
+                   line = list(width=5)) %>%
+         layout(xaxis = list(title = "Peso"),
+                yaxis = list(title = "Altura"))
+p4
+
+```
+
+
+### Tree map
+```{r}
+# treemap
+treemap(data,
+        index=c("Bairro","Sexo"),
+        vSize="Idade",
+        type="index"
+)
+```
+
+
+
+
+Data Table
+========================================
+
+```{r}
+datatable(data,
+          caption = "Turma de estudantes",
+          rownames = T,
+          filter = "top",
+          options = list(pageLength = 10))
+```
+
+Pivot Table
+=========================================
+
+```{r}
+rpivotTable(data,
+            rendererName = "Heatmap")
+```
+
+
+Dispersao
+=========================================
+
+```{r}
+
+ggplot(data, aes(x=Altura, y=Peso, fill=Idade)) +
+  geom_label(label=rownames(data), color="white", size=5)
+
+
+```
+
+
+Joyplot
+=========================================
+
+```{r}
+ggplot(data, aes(x = Idade, y = Bairro, fill = Bairro)) +
+  geom_density_ridges() +
+  theme_ridges() + 
+  theme(legend.position = "none")
+```
+
+Corrplot
+=========================================
+```{r}
+M <- cor(data[,c("Altura","Idade","Peso","Irmaos")],method="spearman")
+corrplot.mixed(M, upper="ellipse", lower="number")
+```

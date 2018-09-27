@@ -1,0 +1,42 @@
+<!-- R Commander Markdown Template -->
+
+Replace with Main Title
+=======================
+
+### Your Name
+
+### `r as.character(Sys.Date())`
+
+```{r echo=FALSE}
+# include this code chunk as-is to set options
+knitr::opts_chunk$set(comment=NA, prompt=TRUE, out.width=750, fig.height=8, fig.width=8)
+library(Rcmdr)
+library(car)
+library(RcmdrMisc)
+```
+
+
+```{r echo=FALSE}
+# include this code chunk as-is to enable 3D graphs
+library(rgl)
+knitr::knit_hooks$set(webgl = hook_webgl)
+```
+
+```{r}
+ci.examp(mean.sim = 25, sd = 5, n = 10, reps = 100, conf.level = 0.95, method = 
+  "z")
+```
+
+```{r}
+clt.examp(n = 10, reps = 100, nclass =15)
+```
+
+```{r}
+clt.examp(n = 100, reps = 100, nclass =15)
+```
+
+```{r}
+clt.examp(n = 100, reps = 1000, nclass =15)
+```
+
+
